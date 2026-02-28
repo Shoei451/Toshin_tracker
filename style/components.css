@@ -331,6 +331,7 @@ dialog {
   overflow: hidden;
   box-shadow: var(--shadow-lg);
   background: var(--surface);
+  margin: auto;
 }
 dialog::backdrop {
   background: rgba(0,0,0,0.45);
