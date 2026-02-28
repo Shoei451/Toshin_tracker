@@ -1,6 +1,6 @@
 import { state, formatYearMonth, formatDate, escapeHtml, showToast, $ } from './state.js';
 import { fetchAll, toggleUnitComplete, setUnitScheduledDate, upsertGoal, deleteCourse } from './cloud.js';
-import { initAuth, wireAuthForm, onLogin } from './auth.js';
+import { requireAuthOrRedirect, wireLogoutButton } from './auth.js';
 
 // ── State ─────────────────────────────────────────────────────
 let selectedCourseId = null;
@@ -8,30 +8,28 @@ let currentMonth     = formatYearMonth(new Date());
 
 // ── Init ─────────────────────────────────────────────────────
 async function init() {
-  wireAuthForm();
-  onLogin(async () => {
-    showLoading(true);
-    try {
-      await fetchAll();
-      renderCourseList();
-      // URLパラメータで直接指定されている場合
-      const params = new URLSearchParams(location.search);
-      const cid = params.get('course');
-      if (cid && state.courses.find(c => c.id === cid)) {
-        selectCourse(cid);
-      } else if (state.courses.length) {
-        selectCourse(state.courses[0].id);
-      }
-    } catch (e) {
-      showToast('データの読み込みに失敗しました', 'error');
-      console.error(e);
-    } finally {
-      showLoading(false);
-    }
-  });
-  await initAuth();
-}
+  wireLogoutButton();
+  const session = await requireAuthOrRedirect('index.html');
+  if (!session) return;
 
+  showLoading(true);
+  try {
+    await fetchAll();
+    renderCourseList();
+    const params = new URLSearchParams(location.search);
+    const cid = params.get('course');
+    if (cid && state.courses.find(c => c.id === cid)) {
+      selectCourse(cid);
+    } else if (state.courses.length) {
+      selectCourse(state.courses[0].id);
+    }
+  } catch (e) {
+    showToast('データの読み込みに失敗しました', 'error');
+    console.error(e);
+  } finally {
+    showLoading(false);
+  }
+}
 function showLoading(on) {
   document.getElementById('loading-overlay').classList.toggle('hidden', !on);
   document.getElementById('courses-content').classList.toggle('hidden', on);

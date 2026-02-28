@@ -55,7 +55,8 @@ function renderKPI() {
   document.getElementById('kpi-total-units').textContent = total;
   document.getElementById('kpi-this-month').textContent  = scheduledThisMonth;
   document.getElementById('kpi-next-month').textContent  = scheduledNextMonth;
-  document.getElementById('kpi-courses').textContent     = state.courses.length;
+  const kpiCourses = document.getElementById('kpi-courses');
+  if (kpiCourses) kpiCourses.textContent = state.courses.length;
 
   // overall progress bar
   const bar = document.getElementById('overall-progress-fill');
@@ -219,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     sel.addEventListener('change', () => {
       state.currentMonth = sel.value;
+      renderKPI();
       renderCourseProgress();
       renderMonthlyGoals();
     });

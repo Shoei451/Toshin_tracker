@@ -126,9 +126,14 @@
   transition: all var(--t-fast);
   cursor: pointer;
 }
-.mobile-nav-item .icon { font-size: 20px; }
+/* 追加 */
+.mobile-nav-item svg { display: block; }
 .mobile-nav-item.active { color: var(--green); }
 .mobile-nav-item:active { background: var(--paper-2); }
+/* 追加 */
+.mobile-nav-item.active svg {
+  filter: drop-shadow(0 0 6px rgba(0, 156, 136, 0.7));
+}
 
 /* ── Main content ── */
 .main-content {
@@ -339,6 +344,9 @@ dialog::backdrop {
   backdrop-filter: blur(4px);
 }
 dialog[open] {
+  position: fixed;
+  inset: 0;
+  margin: auto;
   animation: dialog-in 0.2s ease both;
 }
 @keyframes dialog-in {
@@ -471,7 +479,7 @@ dialog[open] {
   .two-col   { grid-template-columns: 1fr; }
   .three-col { grid-template-columns: 1fr 1fr; }
 
-  dialog { width: 100vw; max-height: 95vh; border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-top: auto; margin-bottom: 0; }
+  dialog { width: min(520px, 95vw); max-height: 90vh; border-radius: var(--r-lg); margin: auto; }
   dialog::backdrop { background: rgba(0,0,0,0.5); }
 
   .page-header { margin-bottom: 16px; }

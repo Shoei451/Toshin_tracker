@@ -1,17 +1,39 @@
 import { db } from './config.js';
-import { state, showToast } from './state.js';
+import { state } from './state.js';
 
-let _onLoginCallback  = null;
+let _onLoginCallback = null;
 let _onLogoutCallback = null;
 
-export function onLogin(fn)  { _onLoginCallback  = fn; }
-export function onLogout(fn) { _onLogoutCallback = fn; }
+export function onLogin(fn) {
+  _onLoginCallback = fn;
+}
+
+export function onLogout(fn) {
+  _onLogoutCallback = fn;
+}
+
+export function showApp() {
+  document.getElementById('auth-screen')?.classList.add('hidden');
+  document.getElementById('app-layout')?.classList.add('visible');
+}
+
+export function showAuthScreen() {
+  document.getElementById('auth-screen')?.classList.remove('hidden');
+  document.getElementById('app-layout')?.classList.remove('visible');
+}
+
+export function wireLogoutButton() {
+  const logoutBtn = document.getElementById('logout-btn');
+  logoutBtn?.addEventListener('click', async () => {
+    if (!confirm('ログアウトしますか？')) return;
+    await db.auth.signOut();
+  });
+}
 
 export async function initAuth() {
-  // calendar_appのauth.jsと同じパターン
   let initialized = false;
 
-  db.auth.onAuthStateChange(async (event, session) => {
+  db.auth.onAuthStateChange(async (_event, session) => {
     if (!initialized) return;
     if (session) {
       state.user = session.user;
@@ -36,26 +58,35 @@ export async function initAuth() {
   }
 }
 
-export function showApp() {
-  document.getElementById('auth-screen')?.classList.add('hidden');
-  document.getElementById('app-layout')?.classList.add('visible');
+export async function requireAuthOrRedirect(redirectTo = 'index.html') {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) {
+    location.replace(redirectTo);
+    return null;
+  }
+
+  state.user = session.user;
+  showApp();
+
+  db.auth.onAuthStateChange((_event, latestSession) => {
+    if (!latestSession) {
+      state.user = null;
+      location.replace(redirectTo);
+    }
+  });
+
+  return session;
 }
 
-export function showAuthScreen() {
-  document.getElementById('auth-screen')?.classList.remove('hidden');
-  document.getElementById('app-layout')?.classList.remove('visible');
-}
-
-// ── Auth form wiring ─────────────────────────────────────────
 export function wireAuthForm() {
-  const form        = document.getElementById('auth-form');
-  const emailInput  = document.getElementById('auth-email');
-  const passInput   = document.getElementById('auth-password');
-  const submitBtn   = document.getElementById('auth-submit');
-  const toggleBtn   = document.getElementById('auth-toggle');
-  const errorEl     = document.getElementById('auth-error');
-  const logoutBtn   = document.getElementById('logout-btn');
+  const form = document.getElementById('auth-form');
+  const emailInput = document.getElementById('auth-email');
+  const passInput = document.getElementById('auth-password');
+  const submitBtn = document.getElementById('auth-submit');
+  const toggleBtn = document.getElementById('auth-toggle');
+  const errorEl = document.getElementById('auth-error');
 
+  wireLogoutButton();
   if (!form) return;
 
   let mode = 'login';
@@ -95,10 +126,5 @@ export function wireAuthForm() {
     } finally {
       submitBtn.disabled = false;
     }
-  });
-
-  logoutBtn?.addEventListener('click', async () => {
-    if (!confirm('ログアウトしますか？')) return;
-    await db.auth.signOut();
   });
 }

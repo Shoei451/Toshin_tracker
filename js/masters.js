@@ -1,27 +1,26 @@
 import { state, formatYearMonth, escapeHtml, showToast } from './state.js';
 import { fetchAll, toggleStageComplete, setStageMonthGoal } from './cloud.js';
-import { initAuth, wireAuthForm, onLogin } from './auth.js';
+import { requireAuthOrRedirect, wireLogoutButton } from './auth.js';
 
 let currentMonth = formatYearMonth(new Date());
 
 // ── Init ─────────────────────────────────────────────────────
 async function init() {
-  wireAuthForm();
-  onLogin(async () => {
-    showLoading(true);
-    try {
-      await fetchAll();
-      renderAll();
-    } catch (e) {
-      showToast('データの読み込みに失敗しました', 'error');
-      console.error(e);
-    } finally {
-      showLoading(false);
-    }
-  });
-  await initAuth();
-}
+  wireLogoutButton();
+  const session = await requireAuthOrRedirect('index.html');
+  if (!session) return;
 
+  showLoading(true);
+  try {
+    await fetchAll();
+    renderAll();
+  } catch (e) {
+    showToast('データの読み込みに失敗しました', 'error');
+    console.error(e);
+  } finally {
+    showLoading(false);
+  }
+}
 function showLoading(on) {
   document.getElementById('loading-overlay').classList.toggle('hidden', !on);
   document.getElementById('masters-content').classList.toggle('hidden', on);

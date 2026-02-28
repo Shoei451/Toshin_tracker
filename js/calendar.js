@@ -1,6 +1,6 @@
 import { state, formatDate, formatYearMonth, escapeHtml, showToast, $ } from './state.js';
 import { fetchAll, setUnitScheduledDate } from './cloud.js';
-import { initAuth, wireAuthForm, onLogin } from './auth.js';
+import { requireAuthOrRedirect, wireLogoutButton } from './auth.js';
 
 // ── State ─────────────────────────────────────────────────────
 let currentYear  = new Date().getFullYear();
@@ -8,22 +8,21 @@ let currentMonth = new Date().getMonth(); // 0-indexed
 
 // ── Init ─────────────────────────────────────────────────────
 async function init() {
-  wireAuthForm();
-  onLogin(async () => {
-    showLoading(true);
-    try {
-      await fetchAll();
-      render();
-    } catch (e) {
-      showToast('データの読み込みに失敗しました', 'error');
-      console.error(e);
-    } finally {
-      showLoading(false);
-    }
-  });
-  await initAuth();
-}
+  wireLogoutButton();
+  const session = await requireAuthOrRedirect('index.html');
+  if (!session) return;
 
+  showLoading(true);
+  try {
+    await fetchAll();
+    render();
+  } catch (e) {
+    showToast('データの読み込みに失敗しました', 'error');
+    console.error(e);
+  } finally {
+    showLoading(false);
+  }
+}
 function showLoading(on) {
   document.getElementById('loading-overlay').classList.toggle('hidden', !on);
   document.getElementById('calendar-content').classList.toggle('hidden', on);
@@ -127,7 +126,7 @@ function renderCalendar() {
     events.slice(0, 3).forEach(ev => {
       const chip = document.createElement('div');
       chip.className = `cal-chip${ev.type === 'exam' ? ' exam' : ev.done ? ' done' : ''}`;
-      chip.textContent = ev.type === 'exam' ? '模試' : `第${getUnitNumber(ev.unitId)}コマ`;
+      chip.textContent = ev.type === 'exam' ? ev.label : `第${getUnitNumber(ev.unitId)}コマ`;
       chip.title = ev.label;
       if (ev.type === 'unit') {
         chip.addEventListener('click', e => { e.stopPropagation(); openDayModal(dStr, events); });
