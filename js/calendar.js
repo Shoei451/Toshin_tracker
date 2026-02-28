@@ -9,7 +9,7 @@ let currentMonth = new Date().getMonth(); // 0-indexed
 // ── Init ─────────────────────────────────────────────────────
 async function init() {
   wireLogoutButton();
-  const session = await requireAuthOrRedirect('index.html');
+  const session = await requireAuthOrRedirect('home.html');
   if (!session) return;
 
   showLoading(true);
