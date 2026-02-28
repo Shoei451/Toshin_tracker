@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>高速基礎マスター — 東進受講トラッカー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style/tokens.css">
+  <link rel="stylesheet" href="style/base.css">
+  <link rel="stylesheet" href="style/components.css">
+  <style>
+    /* ── Master cards ── */
+    .master-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .master-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .master-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    /* ── Stage list ── */
+    .stage-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .stage-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--border);
+      background: var(--paper);
+      transition: background var(--t-fast);
+      cursor: default;
+    }
+    .stage-item:hover { background: var(--paper-2); }
+    .stage-item.done { background: var(--green-light); border-color: var(--green-mid); }
+    .stage-item.this-month:not(.done) {
+      border-color: var(--green);
+      background: rgba(0,156,136,0.04);
+    }
+
+    .stage-check { flex-shrink: 0; }
+    .stage-checkbox {
+      width: 22px; height: 22px;
+      border-radius: var(--r-xs);
+      border: 2px solid var(--border-strong);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--t-fast);
+      color: transparent;
+      user-select: none;
+    }
+    .stage-checkbox:hover { border-color: var(--green); }
+    .stage-checkbox.checked {
+      background: var(--green);
+      border-color: var(--green);
+      color: white;
+    }
+
+    .stage-info { flex: 1; min-width: 0; }
+    .stage-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+    .stage-item.done .stage-name {
+      color: var(--green-dark);
+    }
+    .stage-date {
+      font-size: 11px;
+      color: var(--ink-3);
+      margin-top: 2px;
+    }
+
+    .stage-actions { flex-shrink: 0; }
+    .stage-goal-btn {
+      opacity: 0;
+      transition: opacity var(--t-fast);
+    }
+    .stage-item:hover .stage-goal-btn { opacity: 1; }
+
+    /* ── Master grid layout ── */
+    #master-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      #master-list { grid-template-columns: 1fr; }
+      .stage-goal-btn { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Auth -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-mark">T</div>
+      <span class="auth-logo-text">東進受講トラッカー</span>
+    </div>
+    <h2>ログイン</h2>
+    <p class="sub">東進のアカウントで同期されます</p>
+    <div id="auth-error" class="auth-error hidden"></div>
+    <form id="auth-form" class="auth-form">
+      <label>メールアドレス<input type="email" id="auth-email" required placeholder="your@email.com" autocomplete="email"></label>
+      <label>パスワード<input type="password" id="auth-password" required placeholder="パスワード" autocomplete="current-password"></label>
+      <button type="submit" id="auth-submit" class="btn btn-primary" style="width:100%;margin-top:4px;">ログイン</button>
+    </form>
+    <div style="text-align:center;margin-top:16px;font-size:13px;color:var(--ink-3);">
+      アカウントをお持ちでない場合
+      <button type="button" id="auth-toggle" class="btn btn-ghost" style="font-size:13px;padding:4px 8px;min-height:auto;">新規登録</button>
+    </div>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app-layout" class="app-layout">
+
+  <nav class="topnav">
+    <div class="topnav-inner">
+      <a href="index.html" class="nav-logo">
+        <div class="nav-logo-mark">T</div>
+        東進受講トラッカー
+      </a>
+      <div class="nav-links">
+        <a href="index.html"    class="nav-link">ホーム</a>
+        <a href="courses.html"  class="nav-link">講座別進捗</a>
+        <a href="masters.html"  class="nav-link active">高速基礎マスター</a>
+        <a href="calendar.html" class="nav-link">カレンダー</a>
+      </div>
+      <div class="spacer"></div>
+      <button id="logout-btn" class="btn btn-ghost" style="font-size:13px;padding:6px 12px;">ログアウト</button>
+    </div>
+  </nav>
+
+  <main class="main-content">
+
+    <div id="loading-overlay" class="loading-overlay">
+      <div class="spinner"></div><span>読み込み中...</span>
+    </div>
+
+    <div id="masters-content" class="hidden">
+
+      <div class="page-header">
+        <div>
+          <h1>高速基礎マスター</h1>
+          <p class="sub">ステージ進捗と月ごとの目標を管理する</p>
+        </div>
+        <select id="month-select" class="form-select" style="width:auto;"></select>
+      </div>
+
+      <!-- KPI -->
+      <div class="kpi-grid" style="margin-bottom:24px;">
+        <div class="kpi-card accent">
+          <div class="kpi-label">全体完了率</div>
+          <div class="kpi-value"><span id="kpi-stage-pct">0</span><span>%</span></div>
+          <div style="font-size:11px;color:var(--ink-3);margin-top:6px;">
+            <span id="kpi-stages-done">0</span> / <span id="kpi-stages-total">0</span> ステージ
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">今月の予定ステージ</div>
+          <div class="kpi-value"><span id="kpi-month-goals">0</span><span>個</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">マスター数</div>
+          <div class="kpi-value"><span id="kpi-masters-count">—</span></div>
+        </div>
+      </div>
+
+      <!-- Master list -->
+      <div id="master-list"></div>
+
+    </div>
+  </main>
+
+  <nav class="mobile-nav">
+    <div class="mobile-nav-inner">
+      <a href="index.html"    class="mobile-nav-item"><span class="icon">🏠</span>ホーム</a>
+      <a href="courses.html"  class="mobile-nav-item"><span class="icon">📚</span>講座</a>
+      <a href="masters.html"  class="mobile-nav-item active"><span class="icon">⚡</span>マスター</a>
+      <a href="calendar.html" class="mobile-nav-item"><span class="icon">📅</span>カレンダー</a>
+    </div>
+  </nav>
+
+</div>
+
+<!-- Goal modal -->
+<dialog id="goal-modal">
+  <div class="modal-header">
+    <div>
+      <div style="font-size:11px;color:var(--ink-3);margin-bottom:2px;" id="goal-modal-master"></div>
+      <h3 id="goal-modal-title">ステージ</h3>
+    </div>
+    <button class="btn-icon modal-close">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label class="form-label">取り組む月</label>
+      <select id="goal-month-select" class="form-select"></select>
+      <p style="font-size:11px;color:var(--ink-3);margin-top:4px;">「設定しない」にすると月目標から外れます</p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-ghost modal-close">キャンセル</button>
+    <button type="button" id="goal-modal-save" class="btn btn-primary">保存</button>
+  </div>
+</dialog>
+
+<div id="toast-container"></div>
+<script type="module" src="js/masters.js"></script>
+</body>
+</html>

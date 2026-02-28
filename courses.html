@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>講座別進捗 — 東進受講トラッカー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style/tokens.css">
+  <link rel="stylesheet" href="style/base.css">
+  <link rel="stylesheet" href="style/components.css">
+  <style>
+    /* ── Sidebar + detail layout ── */
+    .courses-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* ── Course list sidebar ── */
+    .sidebar-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 72px;
+    }
+    .sidebar-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sidebar-header span { font-size: 13px; font-weight: 700; color: var(--ink-2); }
+    #course-list { max-height: calc(100vh - 200px); overflow-y: auto; }
+
+    .course-list-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background var(--t-fast);
+    }
+    .course-list-item:last-child { border-bottom: none; }
+    .course-list-item:hover { background: var(--paper); }
+    .course-list-item.active { background: var(--green-light); border-left: 3px solid var(--green); }
+    .cli-name    { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 2px; line-height: 1.3; }
+    .cli-subject { font-size: 11px; color: var(--ink-3); margin-bottom: 6px; }
+    .cli-progress { display: flex; align-items: center; gap: 8px; }
+    .cli-pct { font-size: 11px; font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+
+    /* ── Detail area ── */
+    .detail-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .detail-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .detail-title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .detail-title-row h2 { font-size: 19px; font-weight: 700; line-height: 1.3; }
+    .detail-stats {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .detail-stat { text-align: center; }
+    .detail-stat .val { font-size: 22px; font-weight: 700; color: var(--ink); line-height: 1; }
+    .detail-stat .lbl { font-size: 10px; color: var(--ink-3); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .detail-stat.accent .val { color: var(--green-dark); }
+
+    .detail-body { padding: 20px 24px; }
+
+    /* ── Unit grid ── */
+    #unit-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+      gap: 7px;
+    }
+
+    /* ── Goal panel ── */
+    .goal-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-sm);
+      margin-top: 16px;
+    }
+    .goal-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .goal-panel-header h3 { font-size: 14px; font-weight: 700; color: var(--ink); }
+    .goal-input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .goal-input-row input {
+      width: 80px;
+      padding: 7px 10px;
+      border: 1.5px solid var(--border-strong);
+      border-radius: var(--r-sm);
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+      font-family: var(--font-ui);
+      background: var(--paper);
+    }
+    .goal-input-row input:focus { outline: none; border-color: var(--green); }
+    .goal-input-row .unit-label { font-size: 13px; color: var(--ink-3); }
+
+    /* ── Unit modal specifics ── */
+    .unit-modal-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px;
+      background: var(--paper);
+      border-radius: var(--r-sm);
+      margin-bottom: 16px;
+      cursor: pointer;
+    }
+    .unit-modal-status input[type="checkbox"] {
+      width: 20px; height: 20px;
+      accent-color: var(--green);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .unit-modal-status label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .courses-layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar-card {
+        position: static;
+      }
+      #course-list {
+        display: flex;
+        overflow-x: auto;
+        max-height: none;
+        gap: 0;
+        scrollbar-width: none;
+      }
+      #course-list::-webkit-scrollbar { display: none; }
+      .course-list-item {
+        min-width: 140px;
+        border-bottom: none;
+        border-right: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+      .course-list-item.active { border-left: none; border-bottom: 3px solid var(--green); background: var(--green-light); }
+      .detail-header { padding: 16px; }
+      .detail-title-row h2 { font-size: 16px; }
+      .detail-body { padding: 16px; }
+      .detail-stats { gap: 16px; }
+      .detail-stat .val { font-size: 18px; }
+      #unit-grid { grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 5px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Auth -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-mark">T</div>
+      <span class="auth-logo-text">東進受講トラッカー</span>
+    </div>
+    <h2>ログイン</h2>
+    <p class="sub">東進のアカウントで同期されます</p>
+    <div id="auth-error" class="auth-error hidden"></div>
+    <form id="auth-form" class="auth-form">
+      <label>メールアドレス<input type="email" id="auth-email" required placeholder="your@email.com" autocomplete="email"></label>
+      <label>パスワード<input type="password" id="auth-password" required placeholder="パスワード" autocomplete="current-password"></label>
+      <button type="submit" id="auth-submit" class="btn btn-primary" style="width:100%;margin-top:4px;">ログイン</button>
+    </form>
+    <div style="text-align:center;margin-top:16px;font-size:13px;color:var(--ink-3);">
+      アカウントをお持ちでない場合
+      <button type="button" id="auth-toggle" class="btn btn-ghost" style="font-size:13px;padding:4px 8px;min-height:auto;">新規登録</button>
+    </div>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app-layout" class="app-layout">
+
+  <nav class="topnav">
+    <div class="topnav-inner">
+      <a href="index.html" class="nav-logo">
+        <div class="nav-logo-mark">T</div>
+        東進受講トラッカー
+      </a>
+      <div class="nav-links">
+        <a href="index.html"    class="nav-link">ホーム</a>
+        <a href="courses.html"  class="nav-link active">講座別進捗</a>
+        <a href="masters.html"  class="nav-link">高速基礎マスター</a>
+        <a href="calendar.html" class="nav-link">カレンダー</a>
+      </div>
+      <div class="spacer"></div>
+      <button id="logout-btn" class="btn btn-ghost" style="font-size:13px;padding:6px 12px;">ログアウト</button>
+    </div>
+  </nav>
+
+  <main class="main-content">
+
+    <div id="loading-overlay" class="loading-overlay">
+      <div class="spinner"></div><span>読み込み中...</span>
+    </div>
+
+    <div id="courses-content" class="hidden">
+
+      <div class="page-header">
+        <div>
+          <h1>講座別進捗</h1>
+          <p class="sub">コマの完了・予定日を管理する</p>
+        </div>
+        <button id="add-course-btn" class="btn btn-primary">＋ 講座追加</button>
+      </div>
+
+      <div class="courses-layout">
+
+        <!-- Sidebar -->
+        <div class="sidebar-card">
+          <div class="sidebar-header">
+            <span>受講中の講座</span>
+          </div>
+          <div id="course-list"></div>
+        </div>
+
+        <!-- Detail -->
+        <div id="detail-area">
+          <div class="detail-card">
+            <div class="detail-header">
+              <div class="detail-title-row">
+                <div>
+                  <h2 id="detail-course-name">—</h2>
+                  <span class="course-subject" id="detail-course-subject" style="margin-top:4px;display:inline-block;"></span>
+                </div>
+                <button id="delete-course-btn" class="btn btn-ghost" style="font-size:12px;padding:6px 10px;color:var(--danger);border-color:rgba(192,57,43,0.3);">削除</button>
+              </div>
+
+              <div class="detail-stats">
+                <div class="detail-stat accent">
+                  <div class="val" id="detail-pct">0%</div>
+                  <div class="lbl">完了率</div>
+                </div>
+                <div class="detail-stat">
+                  <div class="val"><span id="detail-done">0</span><span style="font-size:14px;color:var(--ink-3);font-weight:400;"> / </span><span id="detail-total">0</span></div>
+                  <div class="lbl">コマ</div>
+                </div>
+                <div class="detail-stat">
+                  <div class="val" id="detail-scheduled">0</div>
+                  <div class="lbl">予定済み</div>
+                </div>
+              </div>
+
+              <div class="progress-bar" style="margin-top:14px;">
+                <div id="detail-progress-bar" class="progress-fill" style="width:0%"></div>
+              </div>
+            </div>
+
+            <div class="detail-body">
+              <div class="section-title" style="margin-bottom:12px;">
+                コマ一覧
+                <span style="font-size:11px;font-weight:400;color:var(--ink-3);text-transform:none;letter-spacing:0;margin-left:8px;">タップでチェック・予定日登録</span>
+              </div>
+
+              <!-- Legend -->
+              <div style="display:flex;gap:16px;margin-bottom:14px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-3);">
+                  <div style="width:16px;height:16px;background:var(--green);border-radius:3px;"></div>完了
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-3);">
+                  <div style="width:16px;height:16px;background:var(--green-light);border:1.5px solid var(--green);border-radius:3px;"></div>予定あり
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-3);">
+                  <div style="width:16px;height:16px;background:var(--paper);border:1.5px solid var(--border-strong);border-radius:3px;"></div>未受講
+                </div>
+              </div>
+
+              <div id="unit-grid"></div>
+            </div>
+          </div>
+
+          <!-- Monthly goal panel -->
+          <div class="goal-panel">
+            <div class="goal-panel-header">
+              <h3>📌 月ごとの目標コマ数</h3>
+              <select id="goal-month-select" class="form-select" style="width:auto;font-size:13px;padding:6px 10px;"></select>
+            </div>
+            <div class="goal-input-row">
+              <input type="number" id="goal-input" min="0" max="50" placeholder="0">
+              <span class="unit-label">コマ / <span id="goal-month-label"></span></span>
+              <button id="goal-save-btn" class="btn btn-primary" style="margin-left:auto;">保存</button>
+            </div>
+            <div id="goal-summary" class="hidden"></div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <nav class="mobile-nav">
+    <div class="mobile-nav-inner">
+      <a href="index.html"    class="mobile-nav-item"><span class="icon">🏠</span>ホーム</a>
+      <a href="courses.html"  class="mobile-nav-item active"><span class="icon">📚</span>講座</a>
+      <a href="masters.html"  class="mobile-nav-item"><span class="icon">⚡</span>マスター</a>
+      <a href="calendar.html" class="mobile-nav-item"><span class="icon">📅</span>カレンダー</a>
+    </div>
+  </nav>
+
+</div>
+
+<!-- ============================
+     Unit Modal
+============================= -->
+<dialog id="unit-modal">
+  <div class="modal-header">
+    <h3 id="unit-modal-title">コマ詳細</h3>
+    <button class="btn-icon modal-close">✕</button>
+  </div>
+  <div class="modal-body">
+
+    <!-- 完了チェック -->
+    <div class="unit-modal-status">
+      <input type="checkbox" id="unit-completed-check">
+      <label for="unit-completed-check">受講完了</label>
+    </div>
+
+    <!-- 完了日（完了時のみ表示） -->
+    <div id="unit-completed-date-row" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">完了日</label>
+        <input type="date" id="unit-completed-date" class="form-input">
+      </div>
+    </div>
+
+    <!-- 予定日 -->
+    <div class="form-group">
+      <label class="form-label">受講予定日</label>
+      <input type="date" id="unit-scheduled-date" class="form-input">
+      <p style="font-size:11px;color:var(--ink-3);margin-top:4px;">設定するとカレンダーアプリに自動追加されます</p>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-ghost modal-close">キャンセル</button>
+    <button type="button" id="unit-save-btn" class="btn btn-primary">保存</button>
+  </div>
+</dialog>
+
+<!-- ============================
+     Add Course Modal
+============================= -->
+<dialog id="add-course-modal">
+  <div class="modal-header">
+    <h3>講座を追加</h3>
+    <button class="btn-icon modal-close">✕</button>
+  </div>
+  <form id="add-course-form">
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">講座名</label>
+        <input id="course-name-input" class="form-input" required placeholder="例：東大対策英語">
+      </div>
+      <div class="form-group">
+        <label class="form-label">科目</label>
+        <select id="course-subject-input" class="form-select" required>
+          <option value="">選択してください</option>
+          <option value="英語">英語</option>
+          <option value="数学">数学</option>
+          <option value="国語">国語</option>
+          <option value="地理">地理</option>
+          <option value="世界史">世界史</option>
+          <option value="現代文">現代文</option>
+          <option value="古文">古文</option>
+          <option value="その他">その他</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">総コマ数</label>
+        <input id="course-units-input" class="form-input" type="number" required min="1" max="200" placeholder="例：20">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-ghost modal-close">キャンセル</button>
+      <button type="submit" class="btn btn-primary">追加する</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast-container"></div>
+<script type="module" src="js/courses.js"></script>
+</body>
+</html>
