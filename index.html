@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>東進受講トラッカー — アプリ紹介</title>
+  <link rel="image/svg+xml" href="images/favicon.svg">
+  <link rel="icon" href="images/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -102,6 +105,43 @@
     .hero-desc {
       font-size: 15px; color: var(--ink-2);
       margin-bottom: 32px; line-height: 1.8;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .hero-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--green);
+      border: 1px solid var(--green);
+      box-shadow: 0 2px 8px rgba(0, 156, 136, 0.25);
+      transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+    }
+    .hero-btn:hover {
+      background: var(--green-dark);
+      border-color: var(--green-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(0, 122, 109, 0.22);
+    }
+    .hero-btn.secondary {
+      background: var(--green-light);
+      color: var(--green-dark);
+      border-color: var(--green-mid);
+      box-shadow: none;
+    }
+    .hero-btn.secondary:hover {
+      background: #d8f2ef;
+      border-color: var(--green);
+      box-shadow: 0 6px 14px rgba(0, 156, 136, 0.12);
     }
     .hero-tags {
       display: flex; flex-wrap: wrap; gap: 8px;
@@ -388,6 +428,15 @@
       <p class="hero-desc">
         コマ単位の受講進捗・受講予定日の管理・高速基礎マスターのステージ追跡・東進模試のカレンダー確認を、ひとつのWebアプリにまとめた個人製作ツール。
       </p>
+      <div class="hero-actions">
+        <a class="hero-btn" href="https://github.com/Shoei451/Toshin_tracker" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          GitHub
+        </a>
+        <a class="hero-btn secondary" href="home.html">Open App</a>
+      </div>
       <div class="hero-tags">
         <span class="hero-tag accent">受講進捗管理</span>
         <span class="hero-tag accent">高速基礎マスター</span>

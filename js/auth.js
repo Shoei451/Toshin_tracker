@@ -58,7 +58,7 @@ export async function initAuth() {
   }
 }
 
-export async function requireAuthOrRedirect(redirectTo = 'index.html') {
+export async function requireAuthOrRedirect(redirectTo = 'home.html') {
   const { data: { session } } = await db.auth.getSession();
   if (!session) {
     location.replace(redirectTo);
