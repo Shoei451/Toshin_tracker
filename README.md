@@ -82,11 +82,11 @@ Sites → Add new site → Deploy manually → フォルダをドロップ
 
 ## 設定変更
 
-`js/config.js` のSupabase URLとAnon Keyを自身のプロジェクトのものに差し替える。
+`js/config.js` のSupabase URLとPublishable Keyを自身のプロジェクトのものに差し替える。
 
 ```js
 const SUPABASE_URL      = 'https://xxxx.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJ...';
+const SUPABASE_KEY = 'publishable_key';
 ```
 
 ## 著作権・免責事項について
