@@ -1,0 +1,18 @@
+{
+  "name": "toshin-tracker",
+  "private": true,
+  "version": "1.0.0",
+  "description": "toshin tracker is a web tool that hepls you keep track of your toshin class schedules. the tools is developed by an individual(Shoei451) and does not have any connection to Toshin or Nagase corp.",
+  "type": "module",
+  "scripts": {
+    "check:js": "node scripts/check-js.mjs",
+    "check:links": "node scripts/check-links.mjs",
+    "check": "npm run check:js && npm run check:links",
+    "build": "node scripts/build.mjs",
+    "dev": "npx serve src"
+  },
+  "devDependencies": {
+    "html-minifier-terser": "^7.2.0",
+    "esbuild": "^0.27.7"
+  }
+}

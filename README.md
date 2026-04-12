@@ -12,12 +12,12 @@
 
 ## 技術スタック
 
-| 項目 | 内容 |
-|------|------|
-| フロントエンド | HTML / CSS / Vanilla JS (ES Modules) |
-| バックエンド | Supabase (PostgreSQL + Auth + RLS) |
-| デプロイ | Netlify |
-| 外部連携 | calendar_app（同一Supabaseプロジェクト）|
+| 項目           | 内容                                     |
+| -------------- | ---------------------------------------- |
+| フロントエンド | HTML / CSS / Vanilla JS (ES Modules)     |
+| バックエンド   | Supabase (PostgreSQL + Auth + RLS)       |
+| デプロイ       | Netlify                                  |
+| 外部連携       | calendar_app（同一Supabaseプロジェクト） |
 
 ## ファイル構成
 
@@ -85,9 +85,10 @@ Sites → Add new site → Deploy manually → フォルダをドロップ
 `js/config.js` のSupabase URLとPublishable Keyを自身のプロジェクトのものに差し替える。
 
 ```js
-const SUPABASE_URL      = 'https://xxxx.supabase.co';
-const SUPABASE_KEY = 'publishable_key';
+const SUPABASE_URL = "https://xxxx.supabase.co";
+const SUPABASE_KEY = "publishable_key";
 ```
 
 ## 著作権・免責事項について
+
 このアプリは個人が独自に開発したツールであり、東進ハイスクール・ナガセ等とは一切関係がありません。アプリ内のデータ（進捗・目標・スケジュール等）はすべてユーザー自身が入力するものであり、東進の教材・コンテンツそのものは一切含みません。

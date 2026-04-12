@@ -1,0 +1,45 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  /* ── Brand ── */
+  --green: #009c88;
+  --green-dark: #007a6d;
+  --green-light: #e6f7f5;
+  --green-mid: #b3e8e3;
+
+  /* ── Neutral ── */
+  --ink: #111111;
+  --ink-2: #444444;
+  --ink-3: #888888;
+  --ink-4: #bbbbbb;
+  --paper: #f8f8f8;
+  --paper-2: #f0f0f0;
+  --surface: #ffffff;
+  --border: rgba(0, 0, 0, 0.1);
+  --border-strong: rgba(0, 0, 0, 0.18);
+
+  /* ── Semantic ── */
+  --danger: #c0392b;
+  --warn: #d68c1a;
+  --warn-bg: #fff8e6;
+  --ok: #2d7d5f;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.1);
+
+  /* ── Radius ── */
+  --r-xs: 4px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+
+  /* ── Typography ── */
+  --font-ui: "Inter", "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif;
+
+  /* ── Transition ── */
+  --t-fast: 0.15s ease;
+  --t-mid: 0.25s ease;
+}
