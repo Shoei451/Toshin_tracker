@@ -9,7 +9,7 @@ const rootDir = new URL("..", import.meta.url).pathname;
 const sourceDir = path.join(rootDir, "src");
 const outputDir = path.join(rootDir, "dist");
 
-const requiredEntries = ["index.html", "post.html", "protected-post.html"];
+const requiredEntries = ["index.html"];
 
 async function pathExists(targetPath) {
   try {
