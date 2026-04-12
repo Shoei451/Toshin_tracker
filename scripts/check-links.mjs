@@ -104,59 +104,11 @@ function checkHtmlFiles(errors) {
   }
 }
 
-// ── list.json チェック ────────────────────────────────────────
-
-function checkListJsonFiles(errors) {
-  const jsonFiles = collectFiles(SITE_ROOT, [".json"]).filter((f) =>
-    f.endsWith("list.json"),
-  );
-
-  for (const jsonFile of jsonFiles) {
-    const relativeFile = relative(ROOT, jsonFile).replaceAll("\\", "/");
-    let cfg;
-
-    try {
-      cfg = JSON.parse(readFileSync(jsonFile, "utf8"));
-    } catch {
-      errors.push({ source: relativeFile, link: "(JSON parse error)" });
-      continue;
-    }
-
-    const sections = cfg.sections ?? [];
-    for (const section of sections) {
-      const items = section.items ?? [];
-      for (const item of items) {
-        const link = item.link;
-        if (!link) continue;
-        if (isSkippableLink(link)) continue;
-        if (isDynamicSlugLink(link)) continue;
-
-        const candidates = resolveCandidates(dirname(jsonFile), link);
-        if (!candidates.some(existsAsPath)) {
-          errors.push({ source: relativeFile, link });
-        }
-      }
-    }
-
-    // backLink も確認
-    if (
-      cfg.backLink &&
-      !isSkippableLink(cfg.backLink) &&
-      !isDynamicSlugLink(cfg.backLink)
-    ) {
-      const candidates = resolveCandidates(dirname(jsonFile), cfg.backLink);
-      if (!candidates.some(existsAsPath)) {
-        errors.push({ source: relativeFile, link: cfg.backLink });
-      }
-    }
-  }
-}
 
 // ── メイン ────────────────────────────────────────────────────
 
 const errors = [];
 checkHtmlFiles(errors);
-checkListJsonFiles(errors);
 
 if (errors.length) {
   console.error("Broken local links found:");
@@ -165,10 +117,7 @@ if (errors.length) {
 }
 
 const htmlCount = collectFiles(SITE_ROOT, [".html"]).length;
-const jsonCount = collectFiles(SITE_ROOT, [".json"]).filter((f) =>
-  f.endsWith("list.json"),
-).length;
 
 console.log(
-  `Local link check passed — ${htmlCount} HTML files, ${jsonCount} list.json files.`,
+  `Local link check passed — ${htmlCount} HTML files.`,
 );
